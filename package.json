@@ -1,0 +1,20 @@
+{
+  "name": "web-project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2",
+    "vite": "^6.3.1"
+  },
+  "dependencies": {
+    "@google/genai": "^0.9.0",
+    "pdfjs-dist": "^2.11.338",
+    "sass": "^1.86.3"
+  }
+}

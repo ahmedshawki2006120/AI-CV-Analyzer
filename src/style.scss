@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Edu+AU+VIC+WA+NT+Pre:wght@400..700&display=swap');
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: 'Cairo', sans-serif;
+}
+
+#app {
+    height: 100vh;
+}
+
+.boxInput {
+
+    background-color: #1e293b;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    h1{
+        margin-top: -15px;
+        margin-bottom: 30px;
+        font-size: 2.5rem;
+    }
+
+    #pdfInput {
+        display: none;
+    }
+
+    .button {
+        background-color: #4A90E2;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 20px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        
+        &:hover {
+            background-color: #357ABD;
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0);
+            background-color: #2C6D98;
+        }
+    }
+
+
+
+
+ 
+}
+
+
+.file-upload-container{
+    color:rgb(255, 255, 255);
+    margin-bottom: 25px;
+    font-size: larger;
+    span{
+        margin-left: 3px;
+    }
+}
+
+
+.loader {
+    width: 65px;
+    aspect-ratio: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+ }
+  
+  .loader:before,
+  .loader:after {
+    content: "";
+    position: absolute;
+    border-radius: 50px;
+    box-shadow: 0 0 0 3px inset #fff;
+    animation: l5 2.5s infinite;
+  }
+  
+  .loader:after {
+    animation-delay: -1.25s;
+    border-radius: 0;
+  }
+  
+  @keyframes l5 {
+    0%    {inset:0    35px 35px 0;}
+    12.5% {inset:0    35px 0    0;}
+    25%   {inset:35px 35px 0    0;}
+    37.5% {inset:35px 0    0    0;}
+    50%   {inset:35px 0    0    35px;}
+    62.5% {inset:0    0    0    35px;}
+    75%   {inset:0    0    35px 35px;}
+    87.5% {inset:0    0    35px 0;}
+    100%  {inset:0    35px 35px 0;}
+  }
+  
+
+.result{
+
+}
+
+
+
