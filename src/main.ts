@@ -22,6 +22,9 @@ pdfInput.addEventListener("change", (e: Event) => {
     const boxInput = document.querySelector(".boxInput") as HTMLElement | null;
     if (boxInput) {
     boxInput.style.display = "none";
+    setTimeout(()=>{
+      (document.querySelector(".result") as HTMLElement).style.display="block"
+    },1500)
     } 
     if (pdfFile) {
       extractTextFromPDF(pdfFile);
@@ -144,11 +147,42 @@ function resultDiv(response: string | undefined): void {
   };
 
   result.innerHTML = `
-    <div class="box rating"><strong>Overall Rating:</strong><br>${rating}</div>
-    <div class="box strengths"><strong>Strengths:</strong><br>${toList(strengths)}</div>
-    <div class="box weaknesses"><strong>Weaknesses:</strong><br>${toList(weaknesses)}</div>
-    <div class="box suggestions"><strong>Suggestions for Improvement:</strong><br>${toList(suggestions)}</div>
-  `;
+  <div class="box collapse rating">
+    <div class="toggle-header">Overall Rating:<i class="fa-solid fa-angle-down"></i></div>
+    <div class="collapse-content">${rating}</div>
+  </div>
+  <div class="box collapse strengths">
+    <div class="toggle-header">Strengths:
+    <i class="fa-solid fa-angle-down"></i></div>
+    <div class="collapse-content">${toList(strengths)}</div>
+  </div>
+  <div class="box collapse weaknesses">
+    <div class="toggle-header">Weaknesses:<i class="fa-solid fa-angle-down"></i></div>
+    <div class="collapse-content">${toList(weaknesses)}</div>
+  </div>
+  <div class="box collapse suggestions">
+    <div class="toggle-header">Suggestions for Improvement:<i class="fa-solid fa-angle-down"></i></div>
+    <div class="collapse-content">${toList(suggestions)}</div>
+  </div>
+`;
+
+const toggleHeaders = document.querySelectorAll('.toggle-header');
+toggleHeaders.forEach(header => {
+  const content = header.nextElementSibling as HTMLElement;
+
+  content.style.display = 'block'; 
+  header.addEventListener('click', () => {
+    const currentDisplay = window.getComputedStyle(content).display;
+    if (currentDisplay === 'block') {
+      content.style.display = 'none';
+    } else {
+      content.style.display = 'block';
+    }
+  });
+});
+
+
+
 }
 
 
