@@ -1,32 +1,134 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <title>Vite + TS</title>
-  </head>
-  <body>
-    <div id="app">
-      <div class="boxInput">
-        <h1>AI CV Analyzer</h1>
-        <div class="file-upload-container">
-          <label for="pdfInput" class="custom-file-upload">
-            <i class="fa-solid fa-arrow-up-from-bracket"></i>
-            <span>Choose a file</span>
-          </label>
-          <input type="file" id="pdfInput" accept="application/pdf" />
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <title>Vite + TS</title>
+  <style>
+    .file-upload-container {
+      border: 2px dashed #ccc;
+      padding: 20px;
+      text-align: center;
+      border-radius: 8px;
+      margin: 20px 0;
+      transition: all 0.3s ease;
+      max-width: 400px;
+      min-width: 260px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .file-upload-container.drag-over {
+      border-color: #4CAF50;
+      background-color: rgba(76, 175, 80, 0.1);
+    }
+
+    .custom-file-upload {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .custom-file-upload i {
+      font-size: 24px;
+    }
+
+    #pdfInput {
+      display: none;
+    }
+
+    .file-name {
+      margin-top: 10px;
+      color: #4CAF50;
+      font-weight: bold;
+      display: none;
+      max-width: 90%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .file-name span {
+      display: inline-block;
+      max-width: 220px;
+      vertical-align: middle;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .success-icon {
+      color: #4CAF50;
+      margin-right: 5px;
+    }
+
+    .boxInput {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 350px;
+      max-width: 450px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+      padding: 30px 10px 20px 10px;
+      box-sizing: border-box;
+      width: 100%;
+      height: auto;
+    }
+
+    .boxInput h1 {
+      margin-bottom: 18px;
+      font-size: 2rem;
+      color: #111;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: unset;
+      max-width: 100%;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="boxInput">
+      <h1>AI CV Analyzer</h1>
+      <div class="file-upload-container" id="dropZone">
+        <label for="pdfInput" class="custom-file-upload">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i>
+          <span>Choose a file or drag and drop your CV here</span>
+        </label>
+        <input type="file" id="pdfInput" accept="application/pdf" />
+        <div class="file-name" id="fileName">
+          <i class="fa-solid fa-check success-icon"></i>
+          <span></span>
         </div>
-        <button class="button" disabled>Generate Report</button>
       </div>
-
-      <div class="boxResult">
-        <div class="loader" style="display: none;"></div>
-        <div class="result" style="display: none;" ></div>
-      </div>
-
+      <button class="button" disabled>Generate Report</button>
     </div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+
+    <div class="boxResult">
+      <div class="loader" style="display: none;"></div>
+      <div class="result" style="display: none;"></div>
+    </div>
+
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
 </html>

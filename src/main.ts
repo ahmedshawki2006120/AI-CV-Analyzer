@@ -1,36 +1,93 @@
 import "./style.scss"
 import * as pdfjsLib from "pdfjs-dist";
 import { GoogleGenAI } from "@google/genai";
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+// Use the local worker to avoid version mismatch
+pdfjsLib.GlobalWorkerOptions.workerSrc = "/node_modules/pdfjs-dist/build/pdf.worker.min.js";
 const ai = new GoogleGenAI({ apiKey: "AIzaSyBwi13J4YRsrxpNGGKDaNQhT7SZrE9CyqA" });
 
-const button=document.querySelector(".button");
+const button = document.querySelector(".button");
 const pdfInput = document.getElementById("pdfInput") as HTMLInputElement;
+const dropZone = document.getElementById("dropZone") as HTMLElement;
 
 let pdfFile: File | null = null;
-let textPdf:string|null=null;
+let textPdf: string | null = null;
 
+// Prevent default drag behaviors
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  dropZone.addEventListener(eventName, preventDefaults, false);
+  document.body.addEventListener(eventName, preventDefaults, false);
+});
 
+// Highlight drop zone when item is dragged over it
+['dragenter', 'dragover'].forEach(eventName => {
+  dropZone.addEventListener(eventName, highlight, false);
+});
 
+['dragleave', 'drop'].forEach(eventName => {
+  dropZone.addEventListener(eventName, unhighlight, false);
+});
+
+// Handle dropped files
+dropZone.addEventListener('drop', handleDrop, false);
+
+function preventDefaults(e: Event) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+function highlight(e: Event) {
+  dropZone.classList.add('drag-over');
+}
+
+function unhighlight(e: Event) {
+  dropZone.classList.remove('drag-over');
+}
+
+function handleDrop(e: DragEvent) {
+  const dt = e.dataTransfer;
+  const files = dt?.files;
+
+  if (files && files.length > 0) {
+    const file = files[0];
+    if (file.type === 'application/pdf') {
+      handleFile(file);
+    } else {
+      alert('Please drop a PDF file');
+    }
+  }
+}
+
+function handleFile(file: File) {
+  button?.removeAttribute("disabled");
+  pdfFile = file;
+
+  // Show file name
+  const fileNameElement = document.getElementById("fileName");
+  const fileNameSpan = fileNameElement?.querySelector("span");
+  if (fileNameElement && fileNameSpan) {
+    fileNameSpan.textContent = file.name;
+    fileNameElement.style.display = "block";
+  }
+
+  button?.addEventListener('click', () => {
+    const boxInput = document.querySelector(".boxInput") as HTMLElement | null;
+    if (boxInput) {
+      boxInput.style.display = "none";
+      setTimeout(() => {
+        (document.querySelector(".result") as HTMLElement).style.display = "block"
+      }, 1500)
+    }
+    if (pdfFile) {
+      extractTextFromPDF(pdfFile);
+    }
+  });
+}
 
 pdfInput.addEventListener("change", (e: Event) => {
   const file = (e.target as HTMLInputElement).files?.[0];
   if (file) {
-    button?.removeAttribute("disabled")
-    pdfFile = file;
-    button?.addEventListener('click', () => {
-    const boxInput = document.querySelector(".boxInput") as HTMLElement | null;
-    if (boxInput) {
-    boxInput.style.display = "none";
-    setTimeout(()=>{
-      (document.querySelector(".result") as HTMLElement).style.display="block"
-    },1500)
-    } 
-    if (pdfFile) {
-      extractTextFromPDF(pdfFile);
-      } 
-    });
-    }
+    handleFile(file);
+  }
 });
 
 async function extractTextFromPDF(file: File) {
@@ -38,11 +95,11 @@ async function extractTextFromPDF(file: File) {
     const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
 
     let textContent = '';
-    
+
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
       const page = await pdf.getPage(pageNumber);
       const text = await page.getTextContent();
-  
+
       textContent += text.items.map((item: any) => item.str).join(' ') + '\n';
     }
     textPdf = `
@@ -72,7 +129,7 @@ Now analyze this CV:
 ${textContent}
 
     `;
-    
+
     await main();
 
   } catch (error) {
@@ -80,33 +137,39 @@ ${textContent}
   }
 }
 
-
-
-
-
-
 async function main() {
   const loader = document.querySelector(".loader") as HTMLElement;
-  loader.style.display = "block"; 
+  loader.style.display = "block";
 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: `${textPdf}`,
     });
-{
-  resultDiv(response.text);
 
-}
+    console.log("API Response:", response); // Debug log
+
+    let text = "";
+    if (response && response.candidates && response.candidates.length > 0) {
+      if (response.candidates[0].content && response.candidates[0].content.parts) {
+        text = response.candidates[0].content.parts.map((part: any) => part.text).join("\n");
+      }
+    }
+
+    if (text) {
+      console.log("Response Text:", text); // Debug log
+      resultDiv(text);
+    } else {
+      console.error("Invalid API Response:", response);
+      resultDiv("Error: Invalid response from API");
+    }
   } catch (err) {
-    resultDiv("Error");
+    console.error("API Error:", err);
+    resultDiv("Error: Failed to analyze CV. Please try again.");
   } finally {
-    loader.style.display = "none"; 
+    loader.style.display = "none";
   }
 }
-
-
-
 
 function splitResponse(response: string | undefined): {
   rating: string,
@@ -136,24 +199,30 @@ function splitResponse(response: string | undefined): {
   };
 }
 
-
 function resultDiv(response: string | undefined): void {
   const result = document.querySelector(".result") as HTMLElement;
+  result.style.display = "block"; // Make sure result is visible
+
+  if (!response) {
+    result.innerHTML = "<div class='error'>Error: No response received</div>";
+    return;
+  }
+
   const { rating, strengths, weaknesses, suggestions } = splitResponse(response);
 
   const toList = (text: string): string => {
+    if (!text || text.trim() === "") return "<p>No data available</p>";
     const items = text.split(/[\n•\-]+/).map(item => item.trim()).filter(item => item.length > 0);
-    return `<ul>${items.map(item => `<li>${item}</li>`).join("")}</ul>`;
+    return items.length > 0 ? `<ul>${items.map(item => `<li>${item}</li>`).join("")}</ul>` : "<p>No data available</p>";
   };
 
   result.innerHTML = `
   <div class="box collapse rating">
     <div class="toggle-header">Overall Rating:<i class="fa-solid fa-angle-down"></i></div>
-    <div class="collapse-content">${rating}</div>
+    <div class="collapse-content">${rating || "No rating available"}</div>
   </div>
   <div class="box collapse strengths">
-    <div class="toggle-header">Strengths:
-    <i class="fa-solid fa-angle-down"></i></div>
+    <div class="toggle-header">Strengths:<i class="fa-solid fa-angle-down"></i></div>
     <div class="collapse-content">${toList(strengths)}</div>
   </div>
   <div class="box collapse weaknesses">
@@ -164,25 +233,29 @@ function resultDiv(response: string | undefined): void {
     <div class="toggle-header">Suggestions for Improvement:<i class="fa-solid fa-angle-down"></i></div>
     <div class="collapse-content">${toList(suggestions)}</div>
   </div>
-`;
+  `;
 
-const toggleHeaders = document.querySelectorAll('.toggle-header');
-toggleHeaders.forEach(header => {
-  const content = header.nextElementSibling as HTMLElement;
-
-  content.style.display = 'block'; 
-  header.addEventListener('click', () => {
-    const currentDisplay = window.getComputedStyle(content).display;
-    if (currentDisplay === 'block') {
-      content.style.display = 'none';
-    } else {
-      content.style.display = 'block';
+  // Add styles for error message
+  const style = document.createElement('style');
+  style.textContent = `
+    .error {
+      color: red;
+      padding: 20px;
+      text-align: center;
+      font-weight: bold;
     }
+  `;
+  document.head.appendChild(style);
+
+  const toggleHeaders = document.querySelectorAll('.toggle-header');
+  toggleHeaders.forEach(header => {
+    const content = header.nextElementSibling as HTMLElement;
+    content.style.display = 'block';
+    header.addEventListener('click', () => {
+      const currentDisplay = window.getComputedStyle(content).display;
+      content.style.display = currentDisplay === 'block' ? 'none' : 'block';
+    });
   });
-});
-
-
-
 }
 
 
